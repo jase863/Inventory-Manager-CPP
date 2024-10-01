@@ -1,0 +1,12 @@
+{
+    "files.associations": {
+        "iostream": "cpp",
+        "xstring": "cpp",
+        "vector": "cpp",
+        "ios": "cpp",
+        "xiosbase": "cpp",
+        "forward_list": "cpp",
+        "xmemory": "cpp"
+    },
+    "C_Cpp.errorSquiggles": "disabled"
+}
