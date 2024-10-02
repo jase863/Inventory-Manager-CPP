@@ -6,7 +6,8 @@
         "ios": "cpp",
         "xiosbase": "cpp",
         "forward_list": "cpp",
-        "xmemory": "cpp"
+        "xmemory": "cpp",
+        "iomanip": "cpp"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }

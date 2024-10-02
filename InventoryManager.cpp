@@ -60,7 +60,7 @@ bool checkIfInListLength(int userChoice, vector<InventoryItem> inventoryList);
 
 InventoryItem SetInfo();
 
-void ViewItems(vector<InventoryItem> itemsList);
+string ViewItems(vector<InventoryItem> inventory);
 
 string AddItemInfo();
 
@@ -76,7 +76,7 @@ vector<InventoryItem> EditPrice(int itemNumber, vector<InventoryItem> inventory)
 
 vector<InventoryItem> EditQuantity(int itemNumber, vector<InventoryItem> inventory);
 
-void CalculateTotal(vector<InventoryItem> inventory);
+float CalculateTotal(vector<InventoryItem> inventory, bool requestTotal = false);
 
 vector<InventoryItem> TakeItem(vector<InventoryItem> inventory);
 
@@ -98,7 +98,7 @@ int main(){
     while (menuChoice != "6")
     {
         cout << "\n\nMain Menu" << "\n" << "____________________";
-        cout << "\n1. Add Item\n2. View Items\n3. Edit Item\n4. Calculate Total\n5. Take Item\n6. Quit\n";
+        cout << "\n1. Add Item\n2. View Items\n3. Edit Item\n4. Calculate Total\n5. Take From Inventory\n6. Quit\n";
         cout << "____________________\n\nPlease Enter a Menu Option: ";
         
         cin >> menuChoice;
@@ -120,7 +120,7 @@ int main(){
             }
 
             else if (menuChoice == "4") {
-                CalculateTotal(itemsInInventory);
+                CalculateTotal(itemsInInventory, true);
             }
 
             else if (menuChoice == "5") {
@@ -193,25 +193,39 @@ InventoryItem SetInfo() {
 }
 
 // This function uses a for each loop to print out the attributes of each item in the inventory.
-void ViewItems(vector<InventoryItem> itemsList) {
+string ViewItems(vector<InventoryItem> inventory) {
 
-    cout << "\n\n" << "Inventory Items";
-    cout << "\n" << "--------------------";
+    if (CalculateTotal(inventory) == 0 && inventory.empty()) {
 
-    int index = 0;
-    // i represents each of the items, and itemslist is the vector that the program loops through.
-    for (InventoryItem i : itemsList) {
+        return "";
+    } 
 
-        // this will print the attributes of each InventoryItem in the vector.
-        cout << "\n" << index + 1 << ". " << i.getItem() << " - $" << fixed << setprecision(2) << i.getPrice() << " Ea - QTY: " << i.getItemQuantity() << " = $" << fixed << setprecision(2) << (i.getPrice()) * (i.getItemQuantity());
+    else {
 
-        index ++;
+        cout << "\n\n" << "Inventory Items";
+        cout << "\n" << "--------------------";
+
+        int index = 0;
+        // i represents each of the items, and itemslist is the vector that the program loops through.
+        for (InventoryItem i : inventory) {
+
+            if (i.getItemQuantity() > 0 && !inventory.empty()) {
+            // This will print the attributes of each InventoryItem in the vector.
+            cout << "\n" << index + 1 << ". " << i.getItem() << " - $" << fixed << setprecision(2) << i.getPrice() << " Ea - QTY: " << i.getItemQuantity() << " = $" << fixed << setprecision(2) << (i.getPrice()) * (i.getItemQuantity());
+            }
+
+            else {
+                cout << "\n" << index + 1 << ". " << i.getItem() << " - OUT OF STOCK";
+            }
+
+            // This adds 1 to the index with each iteration, allowing the list number being printed to increase.
+            index ++;
+        }
+
+        return "\n--------------------";
+
     }
-
-    cout << "\n" <<"--------------------";
-
 }
-
 
 // This function gets the item's name from the user and returns it.
 string AddItemInfo(){
@@ -281,79 +295,90 @@ int AddItemQuantity() {
     return itemQuantity;
 }
 
-// This function allows the user to choose an attribute of an item to change. Once the item is changed, the function returns an updated vector.
+// This function allows the user to choose an attribute of an item to change. Once the item is changed, the function returns an updated vector
+// that replaces the current one.
 
 vector<InventoryItem> ChooseEdit(vector<InventoryItem> inventory) {
 
-    ViewItems(inventory);
+    if (CalculateTotal(inventory) == 0) {
 
-    bool isGoodListNumber = false;
-    bool isGoodAttributeNumber = false;
-    int itemNumber = 0;
-    int attributeNumber = 0;
+        return inventory;
+    } 
 
-    // Check to see if the number is in the range of the vector
-    while (!isGoodListNumber){
+    else {
 
-        cout << "\n\nWhich item number would you like to edit? ";
-        cin >> itemNumber;
+        ViewItems(inventory);
 
-        if (cin.fail() || !checkIfInListLength(itemNumber-1, inventory)) {
-            cout << "\nThat is not a number or not in the list. Please type a number in the list: ";
+        bool isGoodListNumber = false;
+        bool isGoodAttributeNumber = false;
+        int itemNumber = 0;
+        int attributeNumber = 0;
 
-            cin.clear();
-            cin.ignore(100, '\n');
+        // check to see if the number is in the range of the vector
+        while (!isGoodListNumber){
+
+            cout << "\n\nWhich item number would you like to edit? ";
+            cin >> itemNumber;
+
+        // check to see if the input value is a number and if it is within the range of the vector
+            if (cin.fail() || !checkIfInListLength(itemNumber-1, inventory)) {
+                cout << "\nThat is not a number or not in the list. Please type a number in the list: ";
+
+                cin.clear();
+                cin.ignore(100, '\n');
+
+                }
+
+            // Changes the boolean to true and exits the loop
+            else{
+                isGoodListNumber = true;
+            }
+        }
+
+        // Check to see if the number is in the range of the options
+        while (!isGoodAttributeNumber){
+
+            //Options of item attributes to change
+            cout << "\n1. Item Name\n2. Item Price\n3. Item Quantity\n";
+            cout << "\nWhich item Attribute would you like to edit? ";
+            cin >> attributeNumber;
+
+            if (cin.fail() || attributeNumber != 1 && attributeNumber !=2 && attributeNumber !=3) {
+                cout << "\nThat is not a number or not an option. Please type 1, 2, or 3: ";
+
+                cin.clear();
+                cin.ignore(100, '\n');
 
             }
 
-        // Changes the boolean to true and exits the loop
-        else{
-            isGoodListNumber = true;
+            else{
+                isGoodAttributeNumber = true;
+            }
         }
-    }
+        
+        // Allows the user to change the item's name
+        if (attributeNumber == 1) {
 
-    // Check to see if the number is in the range of the options
-    while (!isGoodAttributeNumber){
-
-        //Options of item attributes to change
-        cout << "\n1. Item Name\n2. Item Price\n3. Item Quantity\n";
-        cout << "\nWhich item Attribute would you like to edit? ";
-        cin >> attributeNumber;
-
-        if (cin.fail()){
-            cout << "\nThat is not a number or not an option. Please type 1, 2, or 3: ";
-
-            cin.clear();
-            cin.ignore(100, '\n');
-
+            return EditItem(itemNumber, inventory);
         }
 
-        else{
-            isGoodAttributeNumber = true;
+        // Allows the user to change the item's price
+        else if (attributeNumber == 2) {
+
+            return EditPrice(itemNumber, inventory);
         }
+
+        // Allows the user to change the item's quantity
+        else {
+
+            return EditQuantity(itemNumber, inventory);
+        }
+
     }
-    
-    // Allows the user to change the item's name
-    if (attributeNumber == 1) {
-
-        return EditItem(itemNumber, inventory);
-    }
-
-    // Allows the user to change the item's price
-    else if (attributeNumber == 2) {
-
-        return EditPrice(itemNumber, inventory);
-    }
-
-    // Allows the user to change the item's quantity
-    else {
-
-        return EditQuantity(itemNumber, inventory);
-    }
-
 }
 
-// This function allows the user to change an item's name. Once the item is changed, the function returns an updated vector.
+// This function allows the user to change an item's name. Once the item is changed, the function returns an updated vector
+// that replaces the current one.
 
 vector<InventoryItem> EditItem(int itemNumber, vector<InventoryItem> inventory) {
 
@@ -369,7 +394,8 @@ vector<InventoryItem> EditItem(int itemNumber, vector<InventoryItem> inventory) 
     return inventory;
 }
 
-// This function allows the user to change an item's price. Once the item is changed, the function returns an updated vector.
+// This function allows the user to change an item's price. Once the item is changed, the function returns an updated vector
+// that replaces the current one.
 vector<InventoryItem> EditPrice(int itemNumber, vector<InventoryItem> inventory) {
 
     float newItemPrice = AddItemPrice(inventory.at(itemNumber-1).getItem());
@@ -384,7 +410,8 @@ vector<InventoryItem> EditPrice(int itemNumber, vector<InventoryItem> inventory)
     return inventory;
 }
 
-// This function allows the user to change an item's quantity. Once the item is changed, the function returns an updated vector.
+// This function allows the user to change an item's quantity. Once the item is changed, the function returns an updated vector
+// that replaces the current one.
 vector<InventoryItem> EditQuantity(int itemNumber, vector<InventoryItem> inventory) {
 
     int newItemQuantity = AddItemQuantity();
@@ -400,7 +427,7 @@ vector<InventoryItem> EditQuantity(int itemNumber, vector<InventoryItem> invento
 }
 
 // This function loops through the inventory and adds up the total amount of all inventory.
-void CalculateTotal(vector<InventoryItem> inventory) {
+float CalculateTotal(vector<InventoryItem> inventory, bool requestTotal) {
 
     float totalOfInventory = 0;
 
@@ -409,13 +436,29 @@ void CalculateTotal(vector<InventoryItem> inventory) {
         totalOfInventory += (i.getPrice() * i.getItemQuantity());
         }
     
-    cout << "\nTotal of all Items" << "\n--------------------";
-    cout << "\n$" << fixed << setprecision(2) << totalOfInventory;
+    // This should only print if there is a total and requestTotal == true.
+    if (totalOfInventory > 0 && requestTotal) {
+        cout << "\nTotal of all Items" << "\n--------------------";
+        
+        // "fixed" and "setprecision()" cause floating point numbers to always print to the precision indicated (in this case, 2).
+        cout << "\n$" << fixed << setprecision(2) << totalOfInventory;
+
+        return totalOfInventory;
+    }
+
+    else if (totalOfInventory == 0){
+        cout << "\n\n\nThere is currently no inventory\n\n";
+
+        return totalOfInventory;
+    }
+
+    return totalOfInventory;
+    
 }
 
+// This function allows the user to select a quantity of items to take. The user is only allowed to select the available quantity.
+// The function returns an updated vector that replaces the current one.
 vector<InventoryItem> TakeItem(vector<InventoryItem> inventory) {
-
-    ViewItems(inventory);
 
     bool isGoodListNumber = false;
     bool isGoodAmount = false;
@@ -423,8 +466,15 @@ vector<InventoryItem> TakeItem(vector<InventoryItem> inventory) {
     int quantityToTake = 0;
     int currentQuantity = 0;
 
+    if (CalculateTotal(inventory) == 0) {
+
+        return inventory;
+    } 
+
     // Check to see if the number is in the range of the vector
     while (!isGoodListNumber){
+
+        ViewItems(inventory);
 
         cout << "\n\nWhich item would you like to take from (item number)? ";
 
@@ -468,6 +518,7 @@ vector<InventoryItem> TakeItem(vector<InventoryItem> inventory) {
         
     }
 
+    // Subtracts the specified quantity from the current quantity of the selected it.
     inventory[itemNumber-1].setItemQuantity(currentQuantity - quantityToTake);
 
     return inventory;
